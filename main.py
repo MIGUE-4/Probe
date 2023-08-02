@@ -26,4 +26,4 @@ class fecha_gen(BaseModel):
 @app.post("/genero")
 def genero(fecha:fecha_gen):
    
-   return {data[data['release_date'].str[0:4] == fecha.year]}
+   return dict(data[data['release_date'].str[0:4] == fecha.year])
