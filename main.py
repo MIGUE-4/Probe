@@ -15,6 +15,7 @@ with open(r'steam_games.json') as file:
 
 data = pd.DataFrame(data)
 
+
 @app.get("/index")
 def index():
 
@@ -23,7 +24,20 @@ def index():
 class fecha_gen(BaseModel):
    year : str
 
+
 @app.post("/genero")
 def genero(fecha:fecha_gen):
    
-   return dict(data[data['release_date'].str[0:4] == fecha.year])
+   return {f"El año de {fecha.year} tuvo estos 5 géneros más vendidos":
+           data[data['release_date'].str[0:4] == fecha.year]['genres'].value_counts().head(5).index.to_list()
+           }
+
+
+class juegos_year(BaseModel):
+   year : str
+
+@app.post("/juegos")
+def genero(juego:juegos_year):
+   
+   return {f"Juegos lanzados en {juego.year}":
+           data[data['release_date'].str[0:4] == '2010']['title'].unique().tolist()}
