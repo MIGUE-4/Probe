@@ -5,7 +5,7 @@ import pandas as pd
 
 app = FastAPI()
 
-with open(r'C:\Users\MSI\Documents\Proyectos\Python_Proyects\PI_Steam\steam_games.json') as file:
+with open(r'steam_games.json') as file:
 
     data = []
     for line in file.readlines():
