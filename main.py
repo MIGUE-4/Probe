@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import ast
 import pandas as pd
+import re
 
 
 app = FastAPI()
@@ -16,54 +17,46 @@ with open(r'steam_games.json') as file:
 data = pd.DataFrame(data)
 
 
-class fecha_gen(BaseModel):
-   year : str
+def format_date(fecha):
+    patron = r'^\d{4}-\d{2}-\d{2}$'
+    
+    return re.match(patron, str(fecha)) is not None
 
+data = data[data['release_date'].apply(format_date)]
+data.release_date = pd.to_datetime(data.release_date)
 
-@app.post("/genero")
-def genero(fecha:fecha_gen):
+@app.get("/genero/{fecha}")
+def genero(fecha:int):
    
-   return data[data['release_date'].str[0:4] == fecha.year]['genres'].value_counts().head(5).index.to_list()
+   return data[data['release_date'].dt.year == fecha]['genres'].value_counts().head(5).index.to_list()
         
 
-
-class juegos_year(BaseModel):
-   year : str
-
-@app.post("/juegos")
-def genero(juego:juegos_year):
+@app.get("/juegos/{fecha}")
+def juegos(fecha:int):
    
-   return data[data['release_date'].str[0:4] == juego.year]['title'].unique().tolist()
+   return data[data['release_date'].dt.year == fecha]['title'].unique().tolist()
 
-class specs_year(BaseModel):
-   year : str
 
-@app.post("/specs")
-def specs(spec:specs_year):
+@app.get("/specs/{fecha}")
+def specs(fecha:int):
    
-   return data[data['release_date'].str[0:4] == spec.year].specs.value_counts().head(5).index.tolist()
+   return data[data['release_date'].dt.year  == fecha].specs.value_counts().head(5).index.tolist()
 
-class early_year(BaseModel):
-   year : str
 
-@app.post("/earlyacces")
-def specs(early:early_year):
+
+@app.get("/earlyacces/{fecha}")
+def earlyacces(fecha:int):
    
-   return data[data['release_date'].str[0:4] == early.year].early_access.value_counts().loc[True]
+   return int(data[data['release_date'].dt.year == fecha].early_access.value_counts()[True])
    
 
-class metascore_year(BaseModel):
-   year : str
+@app.get("/metascore/{fecha}")
+def metascore(fecha:int):
+    return data[data['release_date'].dt.year == fecha].sort_values('metascore', ascending=False).head(5)['title'].tolist()
 
-@app.post("/metascore")
-def specs(early:metascore_year):
-    return data[data['release_date'].str[0:4] == early.year].sort_values('metascore', ascending=False).head(5)['title'].tolist()
 
-class sentiment_year(BaseModel):
-   year : str
-
-@app.post("/sentiment")
-def specs(sent:sentiment_year):
-    return data[data['release_date'].str[0:4] == sent.year]['sentiment'].value_counts().to_dict()
+@app.get("/sentiment/{fecha}")
+def sentiment(fecha:int):
+    return data[data['release_date'].dt.year == fecha]['sentiment'].value_counts().to_dict()
     
 
