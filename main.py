@@ -43,12 +43,18 @@ def specs(fecha:int):
    return data[data['release_date'].dt.year  == fecha].specs.value_counts().head(5).index.tolist()
 
 
-
 @app.get("/earlyacces/{fecha}")
 def earlyacces(fecha:int):
    
    return int(data[data['release_date'].dt.year == fecha].early_access.value_counts()[True])
    
+def meta_value(valor):
+    if isinstance(valor, str):
+        return None
+    else:
+        return valor
+    
+data.metascore = data.metascore.apply(meta_value)
 
 @app.get("/metascore/{fecha}")
 def metascore(fecha:int):
@@ -57,6 +63,5 @@ def metascore(fecha:int):
 
 @app.get("/sentiment/{fecha}")
 def sentiment(fecha:int):
-    return data[data['release_date'].dt.year == fecha]['sentiment'].value_counts().to_dict()
     
-
+    return {clave: valor for clave, valor in data[data['release_date'].dt.year == fecha]['sentiment'].value_counts().to_dict().items() if "user" not in clave or "reviews" not in clave}
