@@ -85,7 +85,7 @@ Y_Pred = trained_regress.predict(X_Test)
 class Prediction(BaseModel):
     release_date: int
     early_access: bool
-    metascore: int
+    metascore: float
     action: int
     adventure: int
     animation_modeling: int
@@ -142,10 +142,9 @@ def predict(Prediction:Prediction):
 
     X_Train.loc[[0]] = list(prediction_dict.values())
 
-    print(X_Train.loc[[0]])
     y_pred = trained_regress.predict(X_Train.loc[[0]])
-    
 
-    return {'Estimación de precio':round(y_pred[0],2), 'RMSE':mean_squared_error(Y_Test, Y_Pred, squared=False) }
+
+    return {'Estimación de precio':round(y_pred[0],2), 'RMSE':mean_squared_error(Y_Test, Y_Pred, squared=False)}
 
 
